@@ -1,3 +1,23 @@
+/**************************************************************
+ * Blynk is a platform with iOS and Android apps to control
+ * Arduino, Raspberry Pi and the likes over the Internet.
+ * You can easily build graphic interfaces for all your
+ * projects by simply dragging and dropping widgets.
+ *
+ *   Downloads, docs, tutorials: http://www.blynk.cc
+ *   Blynk community:            http://community.blynk.cc
+ *   Social networks:            http://www.fb.com/blynkapp
+ *                               http://twitter.com/blynk_app
+ *
+ * Blynk library is licensed under MIT license
+ * This example code is in public domain.
+ *
+ **************************************************************
+ * This example shows how to configure static IP with Ethernet.
+ * Be sure to check ordinary Ethernet example first!!!
+ *
+ **************************************************************/
+
 #define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
 #include <SPI.h>
 #include <Ethernet.h>
@@ -18,12 +38,13 @@ dht DHT;
 char auth[] = "997509a2fcc1438c98e038d5b230314d";
 WidgetLCD lcd(4);
 SimpleTimer timer;
+IPAddress server_ip (10, 0, 0, 10);
 
 // Mac address should be different for each device in your LAN
 byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress arduino_ip ( 192,168,0,101);
+IPAddress arduino_ip ( 192,168,169,2);
 IPAddress dns_ip     (  8,   8,   8,   8);
-IPAddress gateway_ip ( 192,168,0,254);
+IPAddress gateway_ip ( 192,168,169,1);
 IPAddress subnet_mask(255, 255, 255,   0);
 
 void setup()
@@ -98,8 +119,8 @@ void pencettombolpower ()
 {
 
     // in steps of 1 degree
-    tombolpowerserver.write(140);              // tell servo to go to position in variable 'pos'
-    delay(2000);                       // waits 15ms for the servo to reach the position
+    tombolpowerserver.write(100);              // tell servo to go to position in variable 'pos'
+    delay(4000);                       // waits 15ms for the servo to reach the position
   
    
     tombolpowerserver.write(0);              // tell servo to go to position in variable 'pos'
