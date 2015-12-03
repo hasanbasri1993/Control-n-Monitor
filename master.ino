@@ -5,6 +5,8 @@
 #include <Servo.h>
 #include <SimpleTimer.h>
 #include "DHT.h"
+#include "EmonLib.h"              // Include Emon Library
+EnergyMonitor emon1;              // Create an instance
 
 Servo tombolpowerserver ;
 int pos = 0;
@@ -31,6 +33,8 @@ void setup()
   tombolpowerserver.attach(44);
   timer.setInterval(1000L, dht11display);
   dht.begin();
+  emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
+  emon1.current(1, 111.1);        // Current: input pin, calibration.
 
 }
 
