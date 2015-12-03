@@ -10,7 +10,7 @@ Servo tombolpowerserver ;
 int pos = 0;
 
 #define DHTTYPE DHT22
-#define DHTPIN 5
+#define DHTPIN 46
 DHT dht(DHTPIN, DHTTYPE);
 
 char auth[] = "997509a2fcc1438c98e038d5b230314d";
@@ -18,23 +18,24 @@ WidgetLCD lcd(4);
 SimpleTimer timer;
 
 byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress arduino_ip ( 192, 168, 0, 101);
+IPAddress arduino_ip ( 192, 168, 137, 101);
 IPAddress dns_ip     (  8,   8,   8,   8);
-IPAddress gateway_ip ( 192, 168, 0, 254);
-IPAddress subnet_mask(255, 255, 255,   0);
+IPAddress gateway_ip ( 192, 168, 137, 1);
+IPAddress subnet_mask(255, 255, 0,   0);
 
 void setup()
 {
   Serial.begin(9600);
   Blynk.begin(auth, "cloud.blynk.cc", 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
-  tombolpowerserver.attach(2);
+  //Blynk.begin(auth);
+  tombolpowerserver.attach(44);
   timer.setInterval(1000L, dht11display);
   dht.begin();
 
 }
 
 BLYNK_WRITE(V1)
-{
+{ 
   // This command writes Arduino's uptime in seconds to Virtual Pin (5)
   // Blynk.virtualWrite(1, pencettombolpower() );
   pencettombolpower ();
