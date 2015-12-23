@@ -28,10 +28,11 @@ IPAddress subnet_mask(255, 255, 0,   0);
 void setup()
 {
   Serial.begin(9600);
-  Blynk.begin(auth, "cloud.blynk.cc", 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
-  //Blynk.begin(auth);
+  //Blynk.begin(auth, "cloud.blynk.cc", 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
+  Blynk.begin(auth);
   tombolpowerserver.attach(44);
   timer.setInterval(1000L, dht11display);
+  timer.setInterval(1000L, power);
   dht.begin();
   emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
   emon1.current(1, 111.1);        // Current: input pin, calibration.
@@ -70,6 +71,12 @@ void dht11display()
   Blynk.virtualWrite(V6, t);
 
 }
+void power ()
+{
+  double Irms = emon1.calcIrms(1480);
+  Blynk.virtualWrite(V10, Irms);
+  Blynk.virtualWrite(V11, Irms*230.0);
+  }
 
 void pencettombolpower ()
 {
