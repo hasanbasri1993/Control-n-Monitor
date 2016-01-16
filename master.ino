@@ -16,7 +16,7 @@ int pos = 0;
 DHT dht(DHTPIN, DHTTYPE);
 
 char auth[] = "997509a2fcc1438c98e038d5b230314d";
-WidgetLCD lcd(4);
+//WidgetLCD lcd(4);
 SimpleTimer timer;
 
 byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
@@ -31,8 +31,8 @@ void setup()
   //Blynk.begin(auth, "cloud.blynk.cc", 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
   Blynk.begin(auth);
   tombolpowerserver.attach(44);
-  timer.setInterval(1000L, dht11display);
-  timer.setInterval(1000L, power);
+  timer.setInterval(3000L, dht11display);
+  timer.setInterval(3000L, power);
   dht.begin();
   emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
   emon1.current(1, 111.1);        // Current: input pin, calibration.
@@ -65,8 +65,8 @@ void dht11display()
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
 
-  lcd.print(0, 1, h);
-  lcd.print(0, 0, t);
+  //lcd.print(0, 1, h);
+  //lcd.print(0, 0, t);
   Blynk.virtualWrite(V5, h);
   Blynk.virtualWrite(V6, t);
 
