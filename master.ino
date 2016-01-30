@@ -47,7 +47,7 @@ BLYNK_WRITE(V1)
 }
 
 void dht11display()
-{
+{ 
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
