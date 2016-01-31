@@ -7,6 +7,9 @@
 #include "DHT.h"
 #include "EmonLib.h"              // Include Emon Library
 EnergyMonitor emon1;              // Create an instance
+#include <Wire.h>
+int val11;
+float val2;
 
 Servo tombolpowerserver ;
 int pos = 0;
@@ -33,6 +36,7 @@ void setup()
   tombolpowerserver.attach(44);
   timer.setInterval(3000L, dht11display);
   timer.setInterval(3000L, power);
+  timer.setInterval(3000L, vbattery);
   dht.begin();
   emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
   emon1.current(1, 111.1);        // Current: input pin, calibration.
@@ -76,6 +80,15 @@ void power ()
   double Irms = emon1.calcIrms(1480);
   Blynk.virtualWrite(V10, Irms);
   Blynk.virtualWrite(V11, Irms*230.0);
+  }
+
+void vbattery (){
+      float temp;
+      val11=analogRead(0);
+      temp=val11/4.117;
+      val2=(temp/10);
+      //Serial.println(val2);
+      Blynk.virtualWrite(V12, val2);
   }
 
 void pencettombolpower ()
