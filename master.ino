@@ -8,6 +8,16 @@
 #include "EmonLib.h"              // Include Emon Library
 EnergyMonitor emon1;              // Create an instance
 #include <Wire.h>
+#include <PubSubClient.h>
+
+char message_buff[250];
+char message_buff_call[200];
+EthernetClient ethClient;
+void callback(char* topic, byte* payload, unsigned int length)
+{
+}
+PubSubClient client("geeknesia.com", 1883, callback, ethClient);
+
 int val11;
 float val2;
 
@@ -37,6 +47,7 @@ void setup()
   timer.setInterval(3000L, dht11display);
   timer.setInterval(3000L, power);
   timer.setInterval(3000L, vbattery);
+  timer.setInterval(3000L, geek);
   dht.begin();
   emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
   emon1.current(1, 111.1);        // Current: input pin, calibration.
@@ -99,6 +110,27 @@ void pencettombolpower ()
   tombolpowerserver.write(0);
 
 }
+
+void geek(){
+  
+  
+  client.connect("device-86a36925d58960bdd6e3d1c9d883bc51", NULL, NULL, "iot/will", 2, 64, "device-86a36925d58960bdd6e3d1c9d883bc51");
+      Serial.println("Aktif");
+          float temp;
+      val11=analogRead(9);
+      temp=val11/3.840;
+      val2=(temp/10);
+      Serial.println(val2);
+    client.publish("iot/live", "device-86a36925d58960bdd6e3d1c9d883bc51"); //Masukkan device id
+    //itoa(val2, pubschar1, 10);
+    String pubString  = "{\"code\":\"815ecd3ed3818462038e91ac00467620:6984188513627be3422e357115c62a53\","; //masukkan username dan password anda sesuai yang ada pada detail device
+    pubString += "\"attributes\": {";
+    pubString += "\"volt\": "+ String(val2);
+
+    pubString += "}}";
+    pubString.toCharArray(message_buff, pubString.length() + 1);
+    client.publish("iot/data", message_buff);
+    }
 
 void loop()
 {
