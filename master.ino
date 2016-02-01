@@ -28,11 +28,13 @@ int pos = 0;
 #define DHTPIN 46
 DHT dht(DHTPIN, DHTTYPE);
 
-char auth[] = "997509a2fcc1438c98e038d5b230314d";
+//char auth[] = "997509a2fcc1438c98e038d5b230314d";
+char auth[] = "d0cffbcc2866412fbd9d4c2b62f08caa";
 //WidgetLCD lcd(4);
 SimpleTimer timer;
 
 byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
+IPAddress server     ( 128, 199, 237, 153);
 IPAddress arduino_ip ( 192, 168, 137, 101);
 IPAddress dns_ip     (  8,   8,   8,   8);
 IPAddress gateway_ip ( 192, 168, 137, 1);
@@ -41,16 +43,16 @@ IPAddress subnet_mask(255, 255, 0,   0);
 void setup()
 {
   Serial.begin(9600);
-  //Blynk.begin(auth, "cloud.blynk.cc", 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
-  Blynk.begin(auth);
+  Blynk.begin(auth, server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
+  //Blynk.begin(auth);
   tombolpowerserver.attach(44);
   timer.setInterval(3000L, dht11display);
   timer.setInterval(3000L, power);
   timer.setInterval(3000L, vbattery);
   timer.setInterval(3000L, geek);
   dht.begin();
-  emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
-  emon1.current(1, 111.1);        // Current: input pin, calibration.
+  emon1.voltage(10, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
+  emon1.current(8, 111.1);        // Current: input pin, calibration.
 
 }
 
@@ -95,8 +97,8 @@ void power ()
 
 void vbattery (){
       float temp;
-      val11=analogRead(0);
-      temp=val11/4.117;
+      val11=analogRead(9);
+      temp=val11/4.130;
       val2=(temp/10);
       //Serial.println(val2);
       Blynk.virtualWrite(V12, val2);
@@ -118,7 +120,7 @@ void geek(){
       Serial.println("Aktif");
           float temp;
       val11=analogRead(9);
-      temp=val11/3.840;
+      temp=val11/4.130;
       val2=(temp/10);
       Serial.println(val2);
     client.publish("iot/live", "device-86a36925d58960bdd6e3d1c9d883bc51"); //Masukkan device id
