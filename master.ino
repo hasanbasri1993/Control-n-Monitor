@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
-#define BLYNK_DEBUG
+//#define BLYNK_DEBUG
 #include <SPI.h>
 #include <Ethernet.h>
 #include <BlynkSimpleEthernet.h>
@@ -39,6 +39,8 @@ PubSubClient client("geeknesia.com", 1883, callback, ethClient);
 
 int val11;
 float val2;
+float valpln;
+float valdc;
 
 Servo tombolpowerserver ;
 int pos = 0;
@@ -66,12 +68,12 @@ void setup()
   //Blynk.begin(auth);
   tombolpowerserver.attach(44);
   timer.setInterval(3000L, dht11display);
-  timer.setInterval(3000L, power);
+  //timer.setInterval(3000L, power);
   timer.setInterval(3000L, vbattery);
   timer.setInterval(3000L, geek);
   dht.begin();
   //emon1.voltage(10, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
-  emon1.current(8, 111.1);        // Current: input pin, calibration.
+  emon1.current(8, 40);        // Current: input pin, calibration.
 
 }
 
@@ -120,11 +122,19 @@ void dht11display()
 }
 void power ()
 {
-  double Irms = emon1.calcIrms(1480);
 
-  Blynk.virtualWrite(V10, Irms);
-  //Blynk.virtualWrite(V11, supplyVoltage);
-  //Blynk.virtualWrite(V12, realPower);
+  float temp1;
+  float voutdc;
+  valdc = analogRead(10);
+  temp1 = valdc / 4.130;
+  voutdc = (temp1 / 10);
+  valpln = voutdc * 14.4 ;
+  //Serial.println(val2);
+
+
+  double Irms = emon1.calcIrms(1480);
+  float power = Irms * valpln;
+
 }
 
 void vbattery () {
@@ -132,15 +142,9 @@ void vbattery () {
   val11 = analogRead(9);
   temp = val11 / 4.130;
   val2 = (temp / 10);
-  //Serial.println(val2);
   Blynk.virtualWrite(V13, val2);
 }
 
-
-void konekgeek() {
-  client.connect("device-86a36925d58960bdd6e3d1c9d883bc51", NULL, NULL, "iot/will", 2, 64, "device-86a36925d58960bdd6e3d1c9d883bc51");
-  client.subscribe("topic-86a36925d58960bdd6e3d1c9d883bc51 ");
-}
 void geek() {
 
   client.connect("device-86a36925d58960bdd6e3d1c9d883bc51", NULL, NULL, "iot/will", 2, 64, "device-86a36925d58960bdd6e3d1c9d883bc51");
@@ -160,9 +164,20 @@ void geek() {
   val11 = analogRead(9);
   vtemp = val11 / 4.130;
   val2 = (vtemp / 10);
+
+  float vout = 0.0;
+  float vin = 0.0;
+  float vpln = 0.0;
+  float R1 = 33000.0; //
+  float R2 = 8200.0; //
+  int value = 0;
+  value = analogRead(10);
+  vout = (value * 5.0) / 1062.0; // see text
+  vin = vout / (R2 / (R1 + R2));
+  vpln = vin * 14.4 ;
   double Irms = emon1.calcIrms(1480);
-  float power = Irms * 220 ;
-  float volttage =  220 ;
+  float power = Irms * vpln ;
+
   client.publish("iot/live", "device-86a36925d58960bdd6e3d1c9d883bc51"); //Masukkan device id
 
   String pubString  = "{\"code\":\"815ecd3ed3818462038e91ac00467620:6984188513627be3422e357115c62a53\","; //masukkan username dan password anda sesuai yang ada pada detail device
@@ -172,11 +187,14 @@ void geek() {
   pubString += "watt\":\"" + String(power) + "\",\"";
   pubString += "current\":\"" + String(Irms) + "\",\"";
   pubString += "voltb\":\"" + String(val2) + "\",\"";
-  pubString += "volt\":\"" + String(volttage) + "\"";
+  pubString += "volt\":\"" + String(vpln) + "\"";
   pubString += "}}";
   pubString.toCharArray(message_buff, pubString.length() + 1);
   client.publish("iot/data", message_buff);
 
+  Blynk.virtualWrite(V10, Irms);
+  Blynk.virtualWrite(V11, vpln);
+  Blynk.virtualWrite(V12, power);
 }
 
 void loop()
