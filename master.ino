@@ -68,7 +68,6 @@ void setup()
   //Blynk.begin(auth);
   tombolpowerserver.attach(44);
   timer.setInterval(3000L, dht11display);
-  //timer.setInterval(3000L, power);
   timer.setInterval(3000L, vbattery);
   timer.setInterval(3000L, geek);
   dht.begin();
@@ -120,22 +119,6 @@ void dht11display()
   Blynk.virtualWrite(V6, t);
 
 }
-void power ()
-{
-
-  float temp1;
-  float voutdc;
-  valdc = analogRead(10);
-  temp1 = valdc / 4.130;
-  voutdc = (temp1 / 10);
-  valpln = voutdc * 14.4 ;
-  //Serial.println(val2);
-
-
-  double Irms = emon1.calcIrms(1480);
-  float power = Irms * valpln;
-
-}
 
 void vbattery () {
   float temp;
@@ -159,12 +142,13 @@ void geek() {
   float hif = dht.computeHeatIndex(f, h);
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
-
+  //Tegangan Battery
   float vtemp;
   val11 = analogRead(9);
   vtemp = val11 / 4.130;
   val2 = (vtemp / 10);
 
+  //Tegangan PLN
   float vout = 0.0;
   float vin = 0.0;
   float vpln = 0.0;
@@ -172,10 +156,13 @@ void geek() {
   float R2 = 8200.0; //
   int value = 0;
   value = analogRead(10);
-  vout = (value * 5.0) / 1062.0; // see text
+  vout = (value * 5.0) / 1010.0; // see text
   vin = vout / (R2 / (R1 + R2));
   vpln = vin * 14.4 ;
+
+  //Arus
   double Irms = emon1.calcIrms(1480);
+  //Daya
   float power = Irms * vpln ;
 
   client.publish("iot/live", "device-86a36925d58960bdd6e3d1c9d883bc51"); //Masukkan device id
