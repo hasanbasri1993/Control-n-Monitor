@@ -49,8 +49,7 @@ int pos = 0;
 #define DHTPIN 46
 DHT dht(DHTPIN, DHTTYPE);
 
-//char auth[] = "997509a2fcc1438c98e038d5b230314d";
-char auth[] = "d0cffbcc2866412fbd9d4c2b62f08caa";
+char auth[] = "0ef215c4602b404a9fa36a88ceaa518c";
 //WidgetLCD lcd(4);
 SimpleTimer timer;
 
