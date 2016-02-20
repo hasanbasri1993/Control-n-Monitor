@@ -63,8 +63,8 @@ IPAddress subnet_mask(255, 255, 0,   0);
 void setup()
 {
   Serial.begin(9600);
-  Blynk.begin(auth, server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
-  //Blynk.begin(auth);
+  //Blynk.begin(auth, server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
+  Blynk.begin(auth);
   tombolpowerserver.attach(44);
   timer.setInterval(3000L, dht11display);
   timer.setInterval(3000L, vbattery);
