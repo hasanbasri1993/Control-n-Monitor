@@ -29,7 +29,7 @@ float valdc;
 #define DHTPIN 46
 DHT dht(DHTPIN, DHTTYPE);
 
-char auth[] = "0ef215c4602b404a9fa36a88ceaa518c";
+char auth[] = "4e14511bec5c4ebd87dd86f9120f0db7";
 //WidgetLCD lcd(4);
 SimpleTimer timer;
 
