@@ -1,0 +1,128 @@
+//#define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
+//#define BLYNK_DEBUG
+#include <SPI.h>
+#include <Ethernet.h>
+#include <BlynkSimpleEthernet.h>
+//#include <Servo.h>
+#include <SimpleTimer.h>
+#include "DHT.h"
+#include "EmonLib.h"              // Include Emon Library
+EnergyMonitor emon1;              // Create an instance
+#include <Wire.h>
+#include <PubSubClient.h>
+
+char message_buff[250];
+char message_buff_call[200];
+EthernetClient ethClient;
+void callback(char* topic, byte* payload, unsigned int length)
+{
+ 
+}
+PubSubClient client("geeknesia.com", 1883, callback, ethClient);
+
+int val11;
+int val2;
+float valpln;
+float valdc;
+
+#define DHTTYPE DHT22
+#define DHTPIN 46
+DHT dht(DHTPIN, DHTTYPE);
+
+char auth[] = "0ef215c4602b404a9fa36a88ceaa518c";
+//WidgetLCD lcd(4);
+SimpleTimer timer;
+
+byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
+IPAddress server     ( 128, 199, 237, 153);
+IPAddress arduino_ip ( 192, 168, 137, 101);
+IPAddress dns_ip     (  8,   8,   8,   8);
+IPAddress gateway_ip ( 192, 168, 137, 1);
+IPAddress subnet_mask(255, 255, 0,   0);
+
+void setup()
+{
+  Serial.begin(9600);
+  //Blynk.begin(auth, server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
+  
+  Blynk.begin(auth);
+  timer.setInterval(3000L, vbattery);
+  timer.setInterval(3000L, geek);
+  dht.begin();
+  
+  emon1.current(8, 40);        // Current: input pin, calibration.
+
+}
+
+void vbattery () {
+  float temp;
+  val11 = analogRead(9);
+  temp = val11 / 4.130;
+  val2 = (temp / 10);
+  Blynk.virtualWrite(V13, val2);
+}
+
+void geek() {
+
+  client.connect("device-86a36925d58960bdd6e3d1c9d883bc51", NULL, NULL, "iot/will", 2, 64, "device-86a36925d58960bdd6e3d1c9d883bc51");
+
+  float h = dht.readHumidity();
+  // Read temperature as Celsius (the default)
+  float t = dht.readTemperature();
+  // Read temperature as Fahrenheit (isFahrenheit = true)
+  float f = dht.readTemperature(true);
+
+  // Compute heat index in Fahrenheit (the default)
+  float hif = dht.computeHeatIndex(f, h);
+  // Compute heat index in Celsius (isFahreheit = false)
+  float hic = dht.computeHeatIndex(t, h, false);
+  //Tegangan Battery
+  float vtemp;
+  val11 = analogRead(9);
+  vtemp = val11 / 4.130;
+  val2 = (vtemp / 10);
+
+  //Tegangan PLN
+  float vout = 0.0;
+  float vin = 0.0;
+  float vpln = 0.0;
+  float R1 = 33000.0; //
+  float R2 = 8200.0; //
+  int value = 0;
+  value = analogRead(10);
+  vout = (value * 5.0) / 1010.0; // see text
+  vin = vout / (R2 / (R1 + R2));
+  vpln = vin * 14.4 ;
+
+  //Arus
+  double Irms = emon1.calcIrms(1480);
+  //Daya
+  float power = Irms * vpln ;
+
+  client.publish("iot/live", "device-86a36925d58960bdd6e3d1c9d883bc51"); //Masukkan device id
+
+  String pubString  = "{\"code\":\"815ecd3ed3818462038e91ac00467620:6984188513627be3422e357115c62a53\","; //masukkan username dan password anda sesuai yang ada pada detail device
+  pubString += "\"attributes\": {";
+  pubString += "\"h1\":\"" + String(h) + "\",\"";
+  pubString += "t1\":\"" + String(t) + "\",\"";
+  pubString += "watt\":\"" + String(power) + "\",\"";
+  pubString += "current\":\"" + String(Irms) + "\",\"";
+  pubString += "voltb\":\"" + String(val2) + "\",\"";
+  pubString += "volt\":\"" + String(vpln) + "\"";
+  pubString += "}}";
+  pubString.toCharArray(message_buff, pubString.length() + 1);
+  client.publish("iot/data", message_buff);
+
+  Blynk.virtualWrite(V10, Irms);
+  Blynk.virtualWrite(V11, vpln);
+  Blynk.virtualWrite(V12, power);
+  Blynk.virtualWrite(V5, h);
+  Blynk.virtualWrite(V6, t);
+}
+
+void loop()
+{
+  Blynk.run();
+  timer.run();
+
+}
